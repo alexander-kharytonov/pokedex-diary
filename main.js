@@ -75,6 +75,7 @@ function createPokemonCard(pokemon) {
     .join(", ");
   const hp = getBaseStat(pokemon, "hp");
   const attack = getBaseStat(pokemon, "attack");
+  const defense = getBaseStat(pokemon, "defense");
   const cry = pokemon.cries.latest ?? pokemon.cries.legacy ?? "";
 
   return `
@@ -160,6 +161,25 @@ function createPokemonCard(pokemon) {
               <div
                 class="h-full rounded-full transition-[width] duration-500"
                 style="width: ${getStatPercentage(attack)}%; background-color: ${accent}"
+              ></div>
+            </div>
+          </div>
+          <div>
+            <div class="mb-2 flex items-center justify-between text-sm">
+              <span class="flex items-center gap-2 font-semibold text-slate-400">
+                <img
+                  class="size-4"
+                  src="./assets/icons/shield.svg"
+                  alt=""
+                />
+                Verteidigung
+              </span>
+              <span class="font-black text-white">${defense}</span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-white/10">
+              <div
+                class="h-full rounded-full transition-[width] duration-500"
+                style="width: ${getStatPercentage(defense)}%; background-color: ${accent}"
               ></div>
             </div>
           </div>
