@@ -30,6 +30,7 @@ const total = document.querySelector("#pokemon-total");
 let nextPageUrl = `${API_URL}/pokemon?limit=${PAGE_SIZE}`;
 let isLoading = false;
 let loadedPokemon = 0;
+let activeCry = null;
 
 const capitalize = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -74,10 +75,12 @@ function createPokemonCard(pokemon) {
     .join(", ");
   const hp = getBaseStat(pokemon, "hp");
   const attack = getBaseStat(pokemon, "attack");
+  const cry = pokemon.cries.latest ?? pokemon.cries.legacy ?? "";
 
   return `
     <article
       class="group overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-2xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:border-white/20"
+      data-cry="${cry}"
     >
       <div
         class="relative isolate h-64 bg-slate-900 p-6"
@@ -90,10 +93,15 @@ function createPokemonCard(pokemon) {
           N°${String(pokemon.id).padStart(4, "0")}
         </span>
         <button
-          class="absolute right-5 top-5 grid size-10 place-items-center rounded-full bg-slate-950/20 text-2xl text-white backdrop-blur-sm transition cursor-pointer hover:bg-red-500"
+          class="catch-button absolute right-5 top-5 grid size-12 cursor-pointer place-items-center rounded-full bg-slate-950/20 backdrop-blur-sm transition hover:bg-red-500"
           type="button"
+          data-catch-button
         >
-          ♡
+          <img
+            class="catch-icon size-8"
+            src="./assets/icons/pokeball.svg"
+            alt="Catch’em!"
+          />
         </button>
         <img
           class="absolute left-1/2 top-1/2 -z-10 w-56 -translate-x-1/2 -translate-y-1/2 brightness-0 invert opacity-15 transition duration-300 group-hover:scale-90"
@@ -192,6 +200,30 @@ function createPokemonCard(pokemon) {
     </article>
   `;
 }
+
+function playPokemonCry(url) {
+  if (!url) return;
+
+  if (activeCry) {
+    activeCry.pause();
+    activeCry.currentTime = 0;
+  }
+
+  activeCry = new Audio(url);
+  activeCry.volume = 0.15;
+  activeCry.play().catch(() => {
+    console.warn("Die Audiodatei konnte nicht abgespielt werden.");
+  });
+}
+
+grid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-catch-button]");
+
+  if (!button) return;
+
+  const card = button.closest("[data-cry]");
+  playPokemonCry(card.dataset.cry);
+});
 
 async function fetchPokemonDetails(url) {
   const response = await fetch(url);

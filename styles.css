@@ -6,3 +6,23 @@
   outline: 2px solid #f87171;
   outline-offset: -2px;
 }
+
+@keyframes pokeball-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-16deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+  75% {
+    transform: rotate(-8deg);
+  }
+}
+
+.catch-button:hover .catch-icon {
+  animation: pokeball-shake 350ms ease-in-out;
+}
