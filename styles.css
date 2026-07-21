@@ -1,0 +1,8 @@
+.mobile-menu-toggle:checked + .mobile-menu {
+  display: block;
+}
+
+.mobile-menu-toggle:focus-visible ~ .mobile-menu {
+  outline: 2px solid #f87171;
+  outline-offset: -2px;
+}
