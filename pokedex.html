@@ -93,13 +93,73 @@
     </header>
     <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <section>
-        <div class="mb-10 rounded-[2rem] border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/20 sm:p-8">
-          <p class="mb-3 text-xs font-black uppercase tracking-[0.25em] text-red-400 sm:text-sm">Meine Sammlung</p>
-          <h1 class="text-3xl font-black tracking-tight text-white sm:text-5xl">Gefangene Pokémon</h1>
-          <p class="mt-4 text-sm leading-6 text-slate-400 sm:text-base">Hier kannst du deine gefangenen Pokémon und persönliche Notizen ansehen.</p>
+        <div
+          class="relative mb-10 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/20 sm:p-8 lg:p-10"
+        >
+          <div
+            class="pointer-events-none absolute -right-24 -top-32 size-80 rounded-full bg-red-500/10 blur-3xl"
+          ></div>
+          <div class="relative">
+            <div
+              class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between"
+            >
+              <div>
+                <p
+                  class="mb-3 text-xs font-black uppercase tracking-[0.25em] text-red-400 sm:text-sm"
+                >
+                  Meine Sammlung
+                </p>
+                <h1
+                  class="text-3xl font-black tracking-tight text-white sm:text-5xl"
+                >
+                  Gefangene Pokémon
+                </h1>
+                <p
+                  class="mt-4 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base"
+                >
+                  Hier kannst du deine gefangenen Pokémon und persönliche
+                  Notizen ansehen.
+                </p>
+              </div>
+
+              <div class="shrink-0 space-y-2 md:w-fit md:min-w-[220px]">
+                <div
+                  class="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3"
+                >
+                  <span
+                    class="grid size-10 place-items-center rounded-xl bg-red-500/15"
+                  >
+                    <img
+                      class="size-6"
+                      src="./assets/icons/pokeball.svg"
+                      alt=""
+                    />
+                  </span>
+                  <span>
+                    <span
+                      class="block text-[10px] font-bold uppercase tracking-widest text-slate-500"
+                    >
+                      Verfügbar
+                    </span>
+                    <span class="text-lg font-black text-white">
+                      <span id="pokemon-total">—</span> Pokémon
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div id="caught-pokemon-grid" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
-        <p id="empty-pokedex-message" class="hidden py-16 text-center text-slate-400">Du hast noch keine Pokémon gefangen.</p>
+        <div
+          id="caught-pokemon-grid"
+          class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
+        ></div>
+        <p
+          id="empty-pokedex-message"
+          class="hidden py-16 text-center text-slate-400"
+        >
+          Du hast noch keine Pokémon gefangen.
+        </p>
       </section>
     </main>
     <script src="pokedex.js"></script>

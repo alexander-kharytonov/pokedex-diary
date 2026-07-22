@@ -1,6 +1,9 @@
 const API_URL = "https://pokeapi.co/api/v2";
 const TYPE_IMAGE_URL = "https://unpkg.com/@pokemonle/icons-svg@0.0.3/icons";
 const PAGE_SIZE = 12;
+const CAUGHT_POKEMON_KEY = "caughtPokemon";
+const POKEBALL_ICON = "./assets/icons/pokeball.svg";
+const CAUGHT_POKEBALL_ICON = "./assets/icons/pokemon-go.svg";
 
 const typeDetails = {
   normal: ["Normal", "#a8a29e"],
@@ -40,7 +43,9 @@ let isLoading = false;
 let loadedPokemon = 0;
 let activeCry = null;
 let searchController = null;
-const displayedPokemon = new Map();
+let caughtPokemon = readCaughtPokemon();
+
+const pokemonCache = new Map();
 
 const capitalize = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -72,8 +77,100 @@ function getStatPercentage(value) {
   return Math.min((value / 180) * 100, 100);
 }
 
+function readCaughtPokemon() {
+  try {
+    const storedPokemon = JSON.parse(
+      localStorage.getItem(CAUGHT_POKEMON_KEY) ?? "[]",
+    );
+
+    return Array.isArray(storedPokemon)
+      ? storedPokemon.filter(
+          (pokemon) => pokemon && Number.isInteger(pokemon.id),
+        )
+      : [];
+  } catch (error) {
+    console.warn("Gefangene Pokémon konnten nicht gelesen werden.", error);
+    return [];
+  }
+}
+
+function writeCaughtPokemon(pokemon) {
+  try {
+    localStorage.setItem(CAUGHT_POKEMON_KEY, JSON.stringify(pokemon));
+    return true;
+  } catch (error) {
+    console.warn("Gefangene Pokémon konnten nicht gespeichert werden.", error);
+    return false;
+  }
+}
+
+function isPokemonCaught(pokemonId) {
+  return caughtPokemon.some(({ id }) => id === pokemonId);
+}
+
+function createStoredPokemon(pokemon) {
+  const image =
+    pokemon.sprites.other["official-artwork"].front_default ??
+    pokemon.sprites.front_default;
+
+  return {
+    id: pokemon.id,
+    name: pokemon.name,
+    image,
+    types: pokemon.types.map(({ type }) => type.name),
+    abilities: pokemon.abilities.map(({ ability }) => ability.name),
+    stats: {
+      hp: getBaseStat(pokemon, "hp"),
+      attack: getBaseStat(pokemon, "attack"),
+      defense: getBaseStat(pokemon, "defense"),
+    },
+    height: pokemon.height,
+    weight: pokemon.weight,
+    cry: pokemon.cries.latest ?? pokemon.cries.legacy ?? "",
+    caughtAt: new Date().toISOString(),
+    note: "",
+  };
+}
+
+function syncCatchButtons(pokemonId) {
+  const isCaught = isPokemonCaught(pokemonId);
+  const cards = document.querySelectorAll(`[data-pokemon-id="${pokemonId}"]`);
+
+  cards.forEach((card) => {
+    const button = card.querySelector("[data-catch-button]");
+    const icon = button?.querySelector(".catch-icon");
+
+    button?.classList.toggle("is-caught", isCaught);
+    if (icon) {
+      icon.src = isCaught ? CAUGHT_POKEBALL_ICON : POKEBALL_ICON;
+      icon.alt = isCaught ? "Freilassen" : "Catch’em!";
+    }
+  });
+}
+
+function toggleCaughtPokemon(pokemonId) {
+  const isCaught = isPokemonCaught(pokemonId);
+  let nextCaughtPokemon;
+
+  if (isCaught) {
+    nextCaughtPokemon = caughtPokemon.filter(({ id }) => id !== pokemonId);
+  } else {
+    const pokemon = pokemonCache.get(pokemonId);
+
+    if (!pokemon) return;
+
+    nextCaughtPokemon = [...caughtPokemon, createStoredPokemon(pokemon)];
+  }
+
+  if (!writeCaughtPokemon(nextCaughtPokemon)) return;
+
+  caughtPokemon = nextCaughtPokemon;
+  syncCatchButtons(pokemonId);
+}
+
 function createPokemonCard(pokemon) {
-  displayedPokemon.set(pokemon.id, pokemon);
+  pokemonCache.set(pokemon.id, pokemon);
+
   const primaryType = pokemon.types[0].type;
   const accent = typeDetails[primaryType.name]?.[1] ?? "#64748b";
   const image =
@@ -88,11 +185,14 @@ function createPokemonCard(pokemon) {
   const attack = getBaseStat(pokemon, "attack");
   const defense = getBaseStat(pokemon, "defense");
   const cry = pokemon.cries.latest ?? pokemon.cries.legacy ?? "";
+  const isCaught = isPokemonCaught(pokemon.id);
+  const caughtClass = isCaught ? "is-caught" : "";
 
   return `
     <article
       class="group overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-2xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:border-white/20"
       data-cry="${cry}"
+      data-pokemon-id="${pokemon.id}"
     >
       <div
         class="relative isolate h-64 bg-slate-900 p-6"
@@ -105,16 +205,24 @@ function createPokemonCard(pokemon) {
           ID ${String(pokemon.id).padStart(5, "0")}
         </div>
         <button
-          class="catch-button absolute right-5 top-5 grid size-12 cursor-pointer place-items-center rounded-full bg-slate-950/20 backdrop-blur-sm transition hover:bg-red-500"
+          class="catch-button ${caughtClass} absolute right-5 top-5 grid size-12 cursor-pointer place-items-center rounded-full border border-transparent bg-slate-950/20 backdrop-blur-sm transition hover:bg-red-500"
           type="button"
           data-catch-button
-          data-pokemon-id="${pokemon.id}"
         >
           <img
             class="catch-icon size-8"
-            src="./assets/icons/pokeball.svg"
-            alt="Catch’em!"
+            src="${isCaught ? CAUGHT_POKEBALL_ICON : POKEBALL_ICON}"
+            alt="${isCaught ? "Freilassen" : "Catch’em!"}"
           />
+          <span
+            class="caught-indicator absolute -bottom-1 -right-1 hidden size-5 place-items-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/40"
+          >
+            <img
+              class="size-3"
+              src="./assets/icons/check.svg"
+              alt=""
+            />
+          </span>
         </button>
         <img
           class="absolute left-1/2 top-1/2 -z-10 w-56 -translate-x-1/2 -translate-y-1/2 brightness-0 invert opacity-15 transition duration-300 group-hover:scale-90"
@@ -254,47 +362,11 @@ document.addEventListener("click", (event) => {
   if (!button) return;
 
   const card = button.closest("[data-cry]");
+  const pokemonId = Number(card.dataset.pokemonId);
+
   playPokemonCry(card.dataset.cry);
-  catchPokemon(displayedPokemon.get(Number(button.dataset.pokemonId)), button);
+  toggleCaughtPokemon(pokemonId);
 });
-
-function getCaughtPokemon() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? [];
-  } catch {
-    return [];
-  }
-}
-
-function catchPokemon(pokemon, button) {
-  if (!pokemon) return;
-
-  const caughtPokemon = getCaughtPokemon();
-  const isAlreadyCaught = caughtPokemon.some(({ id }) => id === pokemon.id);
-
-  if (isAlreadyCaught) {
-    button.title = "Dieses Pokémon hast du bereits gefangen.";
-    return;
-  }
-
-  const image =
-    pokemon.sprites.other["official-artwork"].front_default ??
-    pokemon.sprites.front_default;
-  const caughtPokemonData = {
-    id: pokemon.id,
-    name: pokemon.name,
-    image,
-    types: pokemon.types.map(({ type }) => type.name),
-    hp: getBaseStat(pokemon, "hp"),
-    attack: getBaseStat(pokemon, "attack"),
-    defense: getBaseStat(pokemon, "defense"),
-    note: "",
-  };
-
-  caughtPokemon.push(caughtPokemonData);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(caughtPokemon));
-  button.title = "Gefangen!";
-}
 
 async function fetchPokemonDetails(url) {
   const response = await fetch(url);

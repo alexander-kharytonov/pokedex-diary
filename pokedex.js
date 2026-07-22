@@ -1,6 +1,7 @@
 const STORAGE_KEY = "caughtPokemon";
 const grid = document.querySelector("#caught-pokemon-grid");
 const emptyMessage = document.querySelector("#empty-pokedex-message");
+const total = document.querySelector("#pokemon-total");
 
 function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -32,9 +33,9 @@ function createPokemonCard(pokemon) {
         <h2 class="text-2xl font-black tracking-tight text-white">${capitalize(pokemon.name)}</h2>
         <p class="mt-3 text-sm font-semibold text-red-400">Typen: ${pokemon.types.map(capitalize).join(", ")}</p>
         <dl class="mt-6 grid grid-cols-3 gap-3 text-center">
-          <div class="rounded-2xl bg-white/5 p-3"><dt class="text-xs font-bold text-slate-400">KP</dt><dd class="mt-1 font-black text-white">${pokemon.hp}</dd></div>
-          <div class="rounded-2xl bg-white/5 p-3"><dt class="text-xs font-bold text-slate-400">Angriff</dt><dd class="mt-1 font-black text-white">${pokemon.attack}</dd></div>
-          <div class="rounded-2xl bg-white/5 p-3"><dt class="text-xs font-bold text-slate-400">Verteidigung</dt><dd class="mt-1 font-black text-white">${pokemon.defense}</dd></div>
+          <div class="rounded-2xl bg-white/5 p-3"><dt class="text-xs font-bold text-slate-400">KP</dt><dd class="mt-1 font-black text-white">${pokemon.stats.hp}</dd></div>
+          <div class="rounded-2xl bg-white/5 p-3"><dt class="text-xs font-bold text-slate-400">Angriff</dt><dd class="mt-1 font-black text-white">${pokemon.stats.attack}</dd></div>
+          <div class="rounded-2xl bg-white/5 p-3"><dt class="text-xs font-bold text-slate-400">Verteidigung</dt><dd class="mt-1 font-black text-white">${pokemon.stats.defense}</dd></div>
         </dl>
         <label class="mt-6 block text-sm font-bold text-slate-200" for="note-${pokemon.id}">Persönliche Notiz</label>
         <textarea id="note-${pokemon.id}" data-note-id="${pokemon.id}" class="mt-2 min-h-24 w-full rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-red-400 focus:ring-4 focus:ring-red-500/10" placeholder="Schreibe hier deine Notiz...">${escapeHtml(pokemon.note ?? "")}</textarea>
@@ -45,7 +46,9 @@ function createPokemonCard(pokemon) {
 
 function renderCaughtPokemon() {
   const caughtPokemon = getCaughtPokemon();
+
   grid.innerHTML = caughtPokemon.map(createPokemonCard).join("");
+  total.textContent = caughtPokemon.length;
   emptyMessage.classList.toggle("hidden", caughtPokemon.length > 0);
 }
 
@@ -55,7 +58,9 @@ function saveNote(event) {
   if (!noteInput) return;
 
   const caughtPokemon = getCaughtPokemon();
-  const pokemon = caughtPokemon.find(({ id }) => id === Number(noteInput.dataset.noteId));
+  const pokemon = caughtPokemon.find(
+    ({ id }) => id === Number(noteInput.dataset.noteId),
+  );
 
   if (!pokemon) return;
 
