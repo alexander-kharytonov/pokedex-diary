@@ -36,6 +36,7 @@ const searchToggleLabel = document.querySelector("#search-toggle-label");
 const searchDialog = document.querySelector("#search-dialog");
 const searchDialogClose = document.querySelector("#search-dialog-close");
 const searchResult = document.querySelector("#search-result");
+const STORAGE_KEY = "caughtPokemon";
 
 let nextPageUrl = `${API_URL}/pokemon?limit=${PAGE_SIZE}`;
 let isLoading = false;
@@ -127,6 +128,7 @@ function createStoredPokemon(pokemon) {
     weight: pokemon.weight,
     cry: pokemon.cries.latest ?? pokemon.cries.legacy ?? "",
     caughtAt: new Date().toISOString(),
+    note: "",
   };
 }
 
