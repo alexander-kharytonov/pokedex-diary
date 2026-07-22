@@ -33,12 +33,14 @@ const searchToggleLabel = document.querySelector("#search-toggle-label");
 const searchDialog = document.querySelector("#search-dialog");
 const searchDialogClose = document.querySelector("#search-dialog-close");
 const searchResult = document.querySelector("#search-result");
+const STORAGE_KEY = "caughtPokemon";
 
 let nextPageUrl = `${API_URL}/pokemon?limit=${PAGE_SIZE}`;
 let isLoading = false;
 let loadedPokemon = 0;
 let activeCry = null;
 let searchController = null;
+const displayedPokemon = new Map();
 
 const capitalize = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -71,6 +73,7 @@ function getStatPercentage(value) {
 }
 
 function createPokemonCard(pokemon) {
+  displayedPokemon.set(pokemon.id, pokemon);
   const primaryType = pokemon.types[0].type;
   const accent = typeDetails[primaryType.name]?.[1] ?? "#64748b";
   const image =
@@ -105,6 +108,7 @@ function createPokemonCard(pokemon) {
           class="catch-button absolute right-5 top-5 grid size-12 cursor-pointer place-items-center rounded-full bg-slate-950/20 backdrop-blur-sm transition hover:bg-red-500"
           type="button"
           data-catch-button
+          data-pokemon-id="${pokemon.id}"
         >
           <img
             class="catch-icon size-8"
@@ -251,7 +255,46 @@ document.addEventListener("click", (event) => {
 
   const card = button.closest("[data-cry]");
   playPokemonCry(card.dataset.cry);
+  catchPokemon(displayedPokemon.get(Number(button.dataset.pokemonId)), button);
 });
+
+function getCaughtPokemon() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+function catchPokemon(pokemon, button) {
+  if (!pokemon) return;
+
+  const caughtPokemon = getCaughtPokemon();
+  const isAlreadyCaught = caughtPokemon.some(({ id }) => id === pokemon.id);
+
+  if (isAlreadyCaught) {
+    button.title = "Dieses Pokémon hast du bereits gefangen.";
+    return;
+  }
+
+  const image =
+    pokemon.sprites.other["official-artwork"].front_default ??
+    pokemon.sprites.front_default;
+  const caughtPokemonData = {
+    id: pokemon.id,
+    name: pokemon.name,
+    image,
+    types: pokemon.types.map(({ type }) => type.name),
+    hp: getBaseStat(pokemon, "hp"),
+    attack: getBaseStat(pokemon, "attack"),
+    defense: getBaseStat(pokemon, "defense"),
+    note: "",
+  };
+
+  caughtPokemon.push(caughtPokemonData);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(caughtPokemon));
+  button.title = "Gefangen!";
+}
 
 async function fetchPokemonDetails(url) {
   const response = await fetch(url);

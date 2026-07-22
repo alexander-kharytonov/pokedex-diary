@@ -91,6 +91,17 @@
         </div>
       </div>
     </header>
-    <main></main>
+    <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <section>
+        <div class="mb-10 rounded-[2rem] border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-black/20 sm:p-8">
+          <p class="mb-3 text-xs font-black uppercase tracking-[0.25em] text-red-400 sm:text-sm">Meine Sammlung</p>
+          <h1 class="text-3xl font-black tracking-tight text-white sm:text-5xl">Gefangene Pokémon</h1>
+          <p class="mt-4 text-sm leading-6 text-slate-400 sm:text-base">Hier kannst du deine gefangenen Pokémon und persönliche Notizen ansehen.</p>
+        </div>
+        <div id="caught-pokemon-grid" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
+        <p id="empty-pokedex-message" class="hidden py-16 text-center text-slate-400">Du hast noch keine Pokémon gefangen.</p>
+      </section>
+    </main>
+    <script src="pokedex.js"></script>
   </body>
 </html>
