@@ -26,3 +26,8 @@
 .catch-button:hover .catch-icon {
   animation: pokeball-shake 350ms ease-in-out;
 }
+
+#search-dialog::backdrop {
+  background-color: rgb(2 6 23 / 80%);
+  backdrop-filter: blur(6px);
+}

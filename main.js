@@ -26,11 +26,19 @@ const typeDetails = {
 const grid = document.querySelector("#pokemon-grid");
 const sentinel = document.querySelector("#pokemon-sentinel");
 const total = document.querySelector("#pokemon-total");
+const searchForm = document.querySelector("#pokemon-search-form");
+const searchInput = document.querySelector("#pokemon-search");
+const searchToggle = document.querySelector("#search-toggle");
+const searchToggleLabel = document.querySelector("#search-toggle-label");
+const searchDialog = document.querySelector("#search-dialog");
+const searchDialogClose = document.querySelector("#search-dialog-close");
+const searchResult = document.querySelector("#search-result");
 
 let nextPageUrl = `${API_URL}/pokemon?limit=${PAGE_SIZE}`;
 let isLoading = false;
 let loadedPokemon = 0;
 let activeCry = null;
+let searchController = null;
 
 const capitalize = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -90,9 +98,9 @@ function createPokemonCard(pokemon) {
           class="absolute -left-16 -top-28 -z-10 h-80 w-[130%] rotate-[-8deg] rounded-[50%] opacity-80"
           style="background-color: ${accent}"
         ></div>
-        <span class="text-sm font-black tracking-widest text-white/70">
-          N°${String(pokemon.id).padStart(4, "0")}
-        </span>
+        <div class="my-2.5 text-sm font-black tracking-widest text-white/70">
+          ID ${String(pokemon.id).padStart(5, "0")}
+        </div>
         <button
           class="catch-button absolute right-5 top-5 grid size-12 cursor-pointer place-items-center rounded-full bg-slate-950/20 backdrop-blur-sm transition hover:bg-red-500"
           type="button"
@@ -236,7 +244,7 @@ function playPokemonCry(url) {
   });
 }
 
-grid.addEventListener("click", (event) => {
+document.addEventListener("click", (event) => {
   const button = event.target.closest("[data-catch-button]");
 
   if (!button) return;
@@ -295,6 +303,105 @@ function showSentinelMessage(message, className = "text-slate-400") {
   sentinel.textContent = message;
 }
 
+function showSearchFeedback(title, message) {
+  searchResult.innerHTML = `
+    <div class="rounded-3xl border border-white/10 bg-slate-900 p-8 text-center">
+      <img
+        class="mx-auto size-14 opacity-60"
+        src="./assets/icons/pokeball.svg"
+        alt=""
+      />
+      <h3 class="mt-5 text-xl font-black text-white">${title}</h3>
+      <p class="mt-2 text-sm leading-6 text-slate-400">${message}</p>
+    </div>
+  `;
+}
+
+function normalizeSearchQuery(value) {
+  const query = value.trim().toLowerCase();
+
+  if (/^\d+$/.test(query)) {
+    return String(Number(query));
+  }
+
+  return query.replaceAll(" ", "-");
+}
+
+async function searchPokemon(query) {
+  searchController?.abort();
+  searchController = new AbortController();
+  searchResult.innerHTML = createSkeletonCard();
+
+  if (!searchDialog.open) searchDialog.showModal();
+
+  try {
+    const response = await fetch(
+      `${API_URL}/pokemon/${encodeURIComponent(query)}`,
+      { signal: searchController.signal },
+    );
+
+    if (response.status === 404) {
+      showSearchFeedback(
+        "Pokémon nicht gefunden",
+        "Prüfe den Namen oder die numerische ID und versuche es erneut.",
+      );
+
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error("Die Suche konnte nicht ausgeführt werden");
+    }
+
+    const pokemon = await response.json();
+    searchResult.innerHTML = createPokemonCard(pokemon);
+  } catch (error) {
+    if (error.name === "AbortError") return;
+
+    showSearchFeedback(
+      "Suche fehlgeschlagen",
+      `${error.message}. Bitte versuche es später erneut.`,
+    );
+  }
+}
+
+searchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const query = normalizeSearchQuery(searchInput.value);
+
+  if (!query || query === "0") {
+    if (!searchDialog.open) searchDialog.showModal();
+    showSearchFeedback(
+      "Ungültige Eingabe",
+      "Gib einen Pokémon-Namen oder eine numerische ID größer als 0 ein.",
+    );
+
+    return;
+  }
+
+  searchPokemon(query);
+});
+
+searchToggle.addEventListener("click", () => {
+  const isOpening = searchForm.classList.contains("hidden");
+
+  searchForm.classList.toggle("hidden", !isOpening);
+  searchToggleLabel.textContent = isOpening
+    ? "Suche schließen"
+    : "Suche öffnen";
+
+  if (isOpening) searchInput.focus();
+});
+
+searchDialogClose.addEventListener("click", () => {
+  searchDialog.close();
+});
+
+searchDialog.addEventListener("click", (event) => {
+  if (event.target === searchDialog) searchDialog.close();
+});
+
 async function loadNextPage() {
   if (isLoading || !nextPageUrl) return;
 
@@ -323,7 +430,8 @@ async function loadNextPage() {
     total.textContent = page.count;
 
     if (!nextPageUrl) {
-      showSentinelMessage("Alle Pokémon wurden geladen.");
+      sentinel.replaceChildren();
+      sentinel.className = "";
       observer.unobserve(sentinel);
     } else {
       sentinel.className = "h-1";
