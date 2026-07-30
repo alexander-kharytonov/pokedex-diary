@@ -1,0 +1,28 @@
+{
+  "name": "pokedex-diary",
+  "version": "1.0.0",
+  "description": "Das Pokédex-Tagebuch ist eine JavaScript-Webanwendung, die mit der PokéAPI Pokémon erkundbar macht. Pokémon können nach Name oder ID gesucht, Detailinformationen angezeigt, Favoriten gespeichert und persönliche Notizen verfasst werden. Favoriten und Notizen werden im LocalStorage gespeichert und bleiben dadurch zwischen Sitzungen erhalten.",
+  "main": "main.js",
+  "scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexander-kharytonov/pokedex-diary.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/alexander-kharytonov/pokedex-diary/issues"
+  },
+  "homepage": "https://github.com/alexander-kharytonov/pokedex-diary#readme",
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.1.5"
+  }
+}
