@@ -37,6 +37,7 @@ jobs:
           cp *.js dist/
           cp .nojekyll dist/
           cp -R assets dist/
+          cp -R src dist/
 
       - name: Upload static files
         uses: actions/upload-pages-artifact@v3
