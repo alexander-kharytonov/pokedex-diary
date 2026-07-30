@@ -8,6 +8,11 @@ import {
   typeDetails,
 } from "./src/modules/constants.js";
 
+import {
+  readCaughtPokemon,
+  writeCaughtPokemon,
+} from "./src/modules/storage.js";
+
 const grid = document.querySelector("#pokemon-grid");
 const sentinel = document.querySelector("#pokemon-sentinel");
 const total = document.querySelector("#pokemon-total");
@@ -59,32 +64,7 @@ function getStatPercentage(value) {
   return Math.min((value / 180) * 100, 100);
 }
 
-function readCaughtPokemon() {
-  try {
-    const storedPokemon = JSON.parse(
-      localStorage.getItem(CAUGHT_POKEMON_KEY) ?? "[]",
-    );
 
-    return Array.isArray(storedPokemon)
-      ? storedPokemon.filter(
-          (pokemon) => pokemon && Number.isInteger(pokemon.id),
-        )
-      : [];
-  } catch (error) {
-    console.warn("Gefangene Pokémon konnten nicht gelesen werden.", error);
-    return [];
-  }
-}
-
-function writeCaughtPokemon(pokemon) {
-  try {
-    localStorage.setItem(CAUGHT_POKEMON_KEY, JSON.stringify(pokemon));
-    return true;
-  } catch (error) {
-    console.warn("Gefangene Pokémon konnten nicht gespeichert werden.", error);
-    return false;
-  }
-}
 
 function isPokemonCaught(pokemonId) {
   return caughtPokemon.some(({ id }) => id === pokemonId);
