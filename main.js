@@ -1,30 +1,12 @@
-const API_URL = "https://pokeapi.co/api/v2";
-const TYPE_IMAGE_URL = "https://unpkg.com/@pokemonle/icons-svg@0.0.3/icons";
-const PAGE_SIZE = 12;
-const CAUGHT_POKEMON_KEY = "caughtPokemon";
-const POKEBALL_ICON = "./assets/icons/pokeball.svg";
-const CAUGHT_POKEBALL_ICON = "./assets/icons/pokemon-go.svg";
-
-const typeDetails = {
-  normal: ["Normal", "#a8a29e"],
-  fire: ["Feuer", "#f97316"],
-  water: ["Wasser", "#3b82f6"],
-  electric: ["Elektro", "#eab308"],
-  grass: ["Pflanze", "#22c55e"],
-  ice: ["Eis", "#06b6d4"],
-  fighting: ["Kampf", "#dc2626"],
-  poison: ["Gift", "#a855f7"],
-  ground: ["Boden", "#ca8a04"],
-  flying: ["Flug", "#818cf8"],
-  psychic: ["Psycho", "#ec4899"],
-  bug: ["Käfer", "#84cc16"],
-  rock: ["Gestein", "#a16207"],
-  ghost: ["Geist", "#7c3aed"],
-  dragon: ["Drache", "#6366f1"],
-  dark: ["Unlicht", "#57534e"],
-  steel: ["Stahl", "#64748b"],
-  fairy: ["Fee", "#f472b6"],
-};
+import {
+  API_URL,
+  TYPE_IMAGE_URL,
+  PAGE_SIZE,
+  CAUGHT_POKEMON_KEY,
+  POKEBALL_ICON,
+  CAUGHT_POKEBALL_ICON,
+  typeDetails,
+} from "./src/modules/constants.js";
 
 const grid = document.querySelector("#pokemon-grid");
 const sentinel = document.querySelector("#pokemon-sentinel");
